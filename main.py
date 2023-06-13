@@ -31,17 +31,6 @@ async def blink(canvas, row, column, symbol='*', offset_tics=0):
             await asyncio.sleep(0)
 
 
-def generate_stars(canvas_height, canvas_width, count):
-    stars = []
-    for _ in range(count):
-        symbol = random.choice('+*.:')
-        row_coordinate = random.randint(2, canvas_height - 2)
-        column_coordinate = random.randint(2, canvas_width - 2)
-        stars.append({'symbol': symbol, 'row_coordinate': row_coordinate, 'column_coordinate': column_coordinate})
-
-    return stars
-
-
 async def make_fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0):
     """Display animation of gun shot, direction and speed can be specified."""
 
@@ -107,19 +96,22 @@ def draw(canvas):
     canvas_height, canvas_width = curses.window.getmaxyx(canvas)
     canvas_center_row_coordinate, canvas_center_column_coordinate = int(canvas_height / 2), int(canvas_width / 2)
 
-    stars = generate_stars(canvas_height, canvas_width, 1000)
+    stars_count = 1000
 
-    blinking_stars = []
-    for star in stars:
+    stars = []
+    for _ in range(stars_count):
+        symbol = random.choice('+*.:')
+        row_coordinate = random.randint(2, canvas_height - 2)
+        column_coordinate = random.randint(2, canvas_width - 2)
         offset_tics = random.randint(1, 100)
         blinking_star = blink(
             canvas,
-            star['row_coordinate'],
-            star['column_coordinate'],
-            symbol=star['symbol'],
+            row_coordinate,
+            column_coordinate,
+            symbol=symbol,
             offset_tics=offset_tics
         )
-        blinking_stars.append(blinking_star)
+        stars.append(blinking_star)
 
     shot = make_fire(canvas, canvas_center_row_coordinate - 1, canvas_center_column_coordinate + 2)
 
@@ -140,7 +132,7 @@ def draw(canvas):
         10
     )
 
-    coroutines = [*blinking_stars, shot, spaceship]
+    coroutines = [*stars, shot, spaceship]
 
     while True:
         for coroutine in coroutines.copy():
