@@ -6,7 +6,10 @@ from itertools import cycle
 
 from curses_tools import draw_frame, read_controls, get_frame_size
 
+
 TIC_TIMEOUT = 0.1
+SPACESHIP_SPEED = 10
+BORDER_WIDTH = 1
 
 
 async def blink(canvas, row, column, symbol='*', offset_tics=0):
@@ -63,10 +66,10 @@ async def make_fire(canvas, start_row, start_column, rows_speed=-0.3, columns_sp
 
 async def animate_spaceship(canvas, spaceship_frames, start_row, start_column, canvas_height, canvas_width, speed=1):
     row, column = start_row, start_column
-    min_row = 1
-    min_column = 1
-    max_row = canvas_height - 1
-    max_column = canvas_width - 1
+    min_row = BORDER_WIDTH
+    min_column = BORDER_WIDTH
+    max_row = canvas_height - BORDER_WIDTH
+    max_column = canvas_width - BORDER_WIDTH
 
     for spaceship_frame in cycle(spaceship_frames):
         rows_direction, columns_direction, space_pressed = read_controls(canvas)
@@ -100,8 +103,8 @@ def draw(canvas):
     stars = []
     for _ in range(stars_count):
         symbol = random.choice('+*.:')
-        row_coordinate = random.randint(2, canvas_height - 2)
-        column_coordinate = random.randint(2, canvas_width - 2)
+        row_coordinate = random.randint(BORDER_WIDTH, canvas_height - BORDER_WIDTH - 1)
+        column_coordinate = random.randint(BORDER_WIDTH, canvas_width - BORDER_WIDTH - 1)
         offset_tics = random.randint(1, 100)
         blinking_star = blink(
             canvas,
@@ -112,7 +115,9 @@ def draw(canvas):
         )
         stars.append(blinking_star)
 
-    shot = make_fire(canvas, canvas_center_row_coordinate - 1, canvas_center_column_coordinate + 2)
+    row_bias = -1
+    column_bias = 2
+    shot = make_fire(canvas, canvas_center_row_coordinate + row_bias, canvas_center_column_coordinate + column_bias)
 
     with open('animation_frames/spaceship_frame_1.txt', 'r') as spaceship_frame_1_file:
         spaceship_frame_1 = spaceship_frame_1_file.read()
@@ -128,7 +133,7 @@ def draw(canvas):
         canvas_center_column_coordinate,
         canvas_height,
         canvas_width,
-        10
+        SPACESHIP_SPEED
     )
 
     coroutines = [*stars, shot, spaceship]
