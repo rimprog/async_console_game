@@ -9,10 +9,9 @@ from curses_tools import draw_frame, read_controls, get_frame_size
 TIC_TIMEOUT = 0.1
 
 
-async def blink(canvas, row, column, symbol='*', bias=True):
-    if bias:
-        for _ in range(random.randint(1, 100)):
-            await asyncio.sleep(0)
+async def blink(canvas, row, column, symbol='*', offset_tics=0):
+    for _ in range(offset_tics):
+        await asyncio.sleep(0)
 
     while True:
         canvas.addstr(row, column, symbol, curses.A_DIM)
@@ -112,7 +111,18 @@ def draw(canvas):
     canvas_center_coordinates = (int(canvas_size[0] / 2), int(canvas_size[1] / 2))
 
     stars = generate_stars(canvas_size, 1000)
-    blinking_stars = [blink(canvas, star['coordinates'][0], star['coordinates'][1], symbol=star['symbol']) for star in stars]
+
+    blinking_stars = []
+    for star in stars:
+        offset_tics = random.randint(1, 100)
+        blinking_star = blink(
+            canvas,
+            star['coordinates'][0],
+            star['coordinates'][1],
+            symbol=star['symbol'],
+            offset_tics=offset_tics
+        )
+        blinking_stars.append(blinking_star)
 
     shot = make_fire(canvas, canvas_center_coordinates[0] - 1, canvas_center_coordinates[1] + 2)
 
