@@ -83,9 +83,8 @@ async def animate_spaceship(canvas, spaceship_frames, start_row, start_column, c
         elif column > max_column - frame_columns:
             column = max_column - frame_columns
 
-        for _ in range(2):
-            draw_frame(canvas, row, column, spaceship_frame)
-            await asyncio.sleep(0)
+        draw_frame(canvas, row, column, spaceship_frame)
+        await asyncio.sleep(0)
         draw_frame(canvas, row, column, spaceship_frame, negative=True)
 
 
@@ -121,7 +120,7 @@ def draw(canvas):
     with open('animation_frames/spaceship_frame_2.txt', 'r') as spaceship_frame_2_file:
         spaceship_frame_2 = spaceship_frame_2_file.read()
 
-    spaceship_frames = (spaceship_frame_1, spaceship_frame_2)
+    spaceship_frames = (spaceship_frame_1, spaceship_frame_1, spaceship_frame_2, spaceship_frame_2)
     spaceship = animate_spaceship(
         canvas,
         spaceship_frames,
