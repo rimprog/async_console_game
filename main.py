@@ -5,6 +5,7 @@ import time
 from itertools import cycle
 
 from curses_tools import draw_frame, read_controls, get_frame_size
+from space_garbage import fly_garbage
 
 
 TIC_TIMEOUT = 0.1
@@ -89,7 +90,6 @@ async def animate_spaceship(canvas, spaceship_frames, start_row, start_column, c
 
 def draw(canvas):
     curses.curs_set(False)
-    canvas.border()
     canvas.nodelay(True)
     canvas_height, canvas_width = curses.window.getmaxyx(canvas)
     canvas_center_row_coordinate, canvas_center_column_coordinate = int(canvas_height / 2), int(canvas_width / 2)
@@ -132,7 +132,12 @@ def draw(canvas):
         SPACESHIP_SPEED
     )
 
-    coroutines = [*stars, shot, spaceship]
+    with open('animation_frames/hubble.txt', "r") as garbage_file:
+        frame = garbage_file.read()
+
+    garbage = fly_garbage(canvas, column=10, garbage_frame=frame)
+
+    coroutines = [*stars, shot, spaceship, garbage]
 
     while True:
         for coroutine in coroutines.copy():
@@ -140,6 +145,7 @@ def draw(canvas):
                 coroutine.send(None)
             except StopIteration:
                 coroutines.remove(coroutine)
+        canvas.border()
         canvas.refresh()
         time.sleep(TIC_TIMEOUT)
         if len(coroutines) == 0:
