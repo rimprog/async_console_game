@@ -77,14 +77,10 @@ async def animate_spaceship(canvas, spaceship_frames, start_row, start_column, c
         column += columns_direction * speed
 
         frame_rows, frame_columns = get_frame_size(spaceship_frame)
-        if row < min_row:
-            row = min_row
-        elif row > max_row - frame_rows:
-            row = max_row - frame_rows
-        elif column < min_column:
-            column = min_column
-        elif column > max_column - frame_columns:
-            column = max_column - frame_columns
+        biased_max_row = max_row - frame_rows
+        biased_max_column = max_column - frame_columns
+        row = min(max(min_row, row), biased_max_row)
+        column = min(max(min_column, column), biased_max_column)
 
         draw_frame(canvas, row, column, spaceship_frame)
         await asyncio.sleep(0)
