@@ -1,5 +1,6 @@
 import asyncio
 import curses
+import os
 import random
 import time
 from itertools import cycle
@@ -7,10 +8,13 @@ from itertools import cycle
 from curses_tools import draw_frame, read_controls, get_frame_size
 from space_garbage import fly_garbage
 
-
 TIC_TIMEOUT = 0.1
-SPACESHIP_SPEED = 10
 BORDER_WIDTH = 1
+SPACESHIP_SPEED = 10
+GARBAGE_RESPAWN_TIME = 20
+
+
+coroutines = []
 
 
 async def blink(canvas, row, column, symbol='*', offset_tics=0):
@@ -88,6 +92,23 @@ async def animate_spaceship(canvas, spaceship_frames, start_row, start_column, c
         draw_frame(canvas, row, column, spaceship_frame, negative=True)
 
 
+async def fill_orbit_with_garbage(canvas, canvas_width, garbage_frames):
+    min_column = BORDER_WIDTH
+    max_column = canvas_width - BORDER_WIDTH
+
+    while True:
+        garbage_frame = random.choice(garbage_frames)
+
+        _, frame_columns = get_frame_size(garbage_frame)
+        biased_max_column = max_column - frame_columns
+        garbage_item_column = random.randint(min_column, biased_max_column)
+
+        garbage_item = fly_garbage(canvas, column=garbage_item_column, garbage_frame=garbage_frame)
+        coroutines.append(garbage_item)
+        for _ in range(GARBAGE_RESPAWN_TIME):
+            await asyncio.sleep(0)
+
+
 def draw(canvas):
     curses.curs_set(False)
     canvas.nodelay(True)
@@ -132,12 +153,17 @@ def draw(canvas):
         SPACESHIP_SPEED
     )
 
-    with open('animation_frames/hubble.txt', "r") as garbage_file:
-        frame = garbage_file.read()
+    garbage_file_names = os.listdir('animation_frames/garbage')
 
-    garbage = fly_garbage(canvas, column=10, garbage_frame=frame)
+    garbage_frames = []
+    for garbage_file_name in garbage_file_names:
+        with open(f'animation_frames/garbage/{garbage_file_name}', "r") as garbage_file:
+            garbage_frame = garbage_file.read()
+            garbage_frames.append(garbage_frame)
 
-    coroutines = [*stars, shot, spaceship, garbage]
+    garbage = fill_orbit_with_garbage(canvas, canvas_width, garbage_frames)
+
+    coroutines.extend([*stars, shot, spaceship, garbage])
 
     while True:
         for coroutine in coroutines.copy():
