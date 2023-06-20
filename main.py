@@ -18,25 +18,20 @@ coroutines = []
 
 
 async def blink(canvas, row, column, symbol='*', offset_tics=0):
-    for _ in range(offset_tics):
-        await asyncio.sleep(0)
+    await sleep(offset_tics)
 
     while True:
         canvas.addstr(row, column, symbol, curses.A_DIM)
-        for _ in range(20):
-            await asyncio.sleep(0)
+        await sleep(20)
 
         canvas.addstr(row, column, symbol)
-        for _ in range(3):
-            await asyncio.sleep(0)
+        await sleep(3)
 
         canvas.addstr(row, column, symbol, curses.A_BOLD)
-        for _ in range(5):
-            await asyncio.sleep(0)
+        await sleep(5)
 
         canvas.addstr(row, column, symbol)
-        for _ in range(3):
-            await asyncio.sleep(0)
+        await sleep(3)
 
 
 async def make_fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0):
@@ -105,8 +100,12 @@ async def fill_orbit_with_garbage(canvas, canvas_width, garbage_frames):
 
         garbage_item = fly_garbage(canvas, column=garbage_item_column, garbage_frame=garbage_frame)
         coroutines.append(garbage_item)
-        for _ in range(GARBAGE_RESPAWN_TIME):
-            await asyncio.sleep(0)
+        await sleep(GARBAGE_RESPAWN_TIME)
+
+
+async def sleep(tics=1):
+    for _ in range(tics):
+        await asyncio.sleep(0)
 
 
 def draw(canvas):
