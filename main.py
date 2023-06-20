@@ -85,6 +85,12 @@ async def animate_spaceship(canvas, spaceship_frames, start_row, start_column, c
         row = min(max(min_row, row), biased_max_row)
         column = min(max(min_column, column), biased_max_column)
 
+        if space_pressed:
+            biased_shot_row = row - 1
+            biased_shot_column = column + 2
+            shot = make_fire(canvas, biased_shot_row, biased_shot_column)
+            coroutines.append(shot)
+
         draw_frame(canvas, row, column, spaceship_frame)
         await asyncio.sleep(0)
         draw_frame(canvas, row, column, spaceship_frame, negative=True)
@@ -134,10 +140,6 @@ def draw(canvas):
         )
         stars.append(blinking_star)
 
-    row_bias = -1
-    column_bias = 2
-    shot = make_fire(canvas, canvas_center_row_coordinate + row_bias, canvas_center_column_coordinate + column_bias)
-
     with open('animation_frames/spaceship_frame_1.txt', 'r') as spaceship_frame_1_file:
         spaceship_frame_1 = spaceship_frame_1_file.read()
 
@@ -164,7 +166,7 @@ def draw(canvas):
 
     garbage = fill_orbit_with_garbage(canvas, canvas_width, garbage_frames)
 
-    coroutines.extend([*stars, shot, spaceship, garbage])
+    coroutines.extend([*stars, spaceship, garbage])
 
     while True:
         for coroutine in coroutines.copy():
