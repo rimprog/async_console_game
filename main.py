@@ -6,11 +6,11 @@ import time
 from itertools import cycle
 
 from curses_tools import draw_frame, read_controls, get_frame_size
+from physics import update_speed
 from space_garbage import fly_garbage
 
 TIC_TIMEOUT = 0.1
 BORDER_WIDTH = 1
-SPACESHIP_SPEED = 10
 GARBAGE_RESPAWN_TIME = 20
 
 
@@ -64,8 +64,10 @@ async def make_fire(canvas, start_row, start_column, rows_speed=-0.3, columns_sp
         column += columns_speed
 
 
-async def animate_spaceship(canvas, spaceship_frames, start_row, start_column, canvas_height, canvas_width, speed=1):
+async def animate_spaceship(canvas, spaceship_frames, start_row, start_column, canvas_height, canvas_width):
     row, column = start_row, start_column
+    row_speed = column_speed = 0
+
     min_row = BORDER_WIDTH
     min_column = BORDER_WIDTH
     max_row = canvas_height - BORDER_WIDTH
@@ -73,8 +75,9 @@ async def animate_spaceship(canvas, spaceship_frames, start_row, start_column, c
 
     for spaceship_frame in cycle(spaceship_frames):
         rows_direction, columns_direction, space_pressed = read_controls(canvas)
-        row += rows_direction * speed
-        column += columns_direction * speed
+        row_speed, column_speed = update_speed(row_speed, column_speed, rows_direction, columns_direction)
+        row += row_speed
+        column += column_speed
 
         frame_rows, frame_columns = get_frame_size(spaceship_frame)
         biased_max_row = max_row - frame_rows
@@ -149,7 +152,6 @@ def draw(canvas):
         canvas_center_column_coordinate,
         canvas_height,
         canvas_width,
-        SPACESHIP_SPEED
     )
 
     garbage_file_names = os.listdir('animation_frames/garbage')
