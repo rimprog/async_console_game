@@ -58,6 +58,9 @@ async def make_fire(canvas, start_row, start_column, rows_speed=-0.3, columns_sp
     curses.beep()
 
     while 1 < row < max_row and 1 < column < max_column:
+        for obstacle in obstacles.values():
+            if obstacle.has_collision(row, column):
+                return
         canvas.addstr(round(row), round(column), symbol)
         await asyncio.sleep(0)
         canvas.addstr(round(row), round(column), ' ')
