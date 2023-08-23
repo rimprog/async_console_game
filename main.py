@@ -6,8 +6,9 @@ import time
 from itertools import cycle
 
 from curses_tools import draw_frame, read_controls, get_frame_size
+from obstacles import show_obstacles
 from physics import update_speed
-from space_garbage import fly_garbage
+from space_garbage import fly_garbage, obstacles
 
 TIC_TIMEOUT = 0.1
 BORDER_WIDTH = 1
@@ -100,14 +101,16 @@ async def fill_orbit_with_garbage(canvas, canvas_width, garbage_frames):
     min_column = BORDER_WIDTH
     max_column = canvas_width - BORDER_WIDTH
 
+    uid = 0
     while True:
+        uid += 1
         garbage_frame = random.choice(garbage_frames)
 
-        _, frame_columns = get_frame_size(garbage_frame)
-        biased_max_column = max_column - frame_columns
+        frame_row_count, frame_column_count = get_frame_size(garbage_frame)
+        biased_max_column = max_column - frame_column_count
         garbage_item_column = random.randint(min_column, biased_max_column)
 
-        garbage_item = fly_garbage(canvas, column=garbage_item_column, garbage_frame=garbage_frame)
+        garbage_item = fly_garbage(canvas, garbage_item_column, garbage_frame, frame_row_count, frame_column_count, uid)
         coroutines.append(garbage_item)
         await sleep(GARBAGE_RESPAWN_TIME)
 
@@ -166,7 +169,9 @@ def draw(canvas):
 
     garbage = fill_orbit_with_garbage(canvas, canvas_width, garbage_frames)
 
-    coroutines.extend([*stars, spaceship, garbage])
+    showed_obstacles = show_obstacles(canvas, obstacles.values())
+
+    coroutines.extend([*stars, spaceship, garbage, showed_obstacles])
 
     while True:
         for coroutine in coroutines.copy():
