@@ -5,6 +5,7 @@ from obstacles import Obstacle
 
 
 obstacles = {}
+obstacles_in_last_collisions = {}
 
 
 async def fly_garbage(canvas, column, garbage_frame, frame_row_count, frame_column_count, uid, speed=0.5):
@@ -20,13 +21,16 @@ async def fly_garbage(canvas, column, garbage_frame, frame_row_count, frame_colu
     obstacles[obstacle.uid] = obstacle
 
     while row < rows_number:
-        obstacle = obstacles[uid]
         obstacle.row = row
         draw_frame(canvas, row, column, garbage_frame)
 
         await asyncio.sleep(0)
 
         draw_frame(canvas, row, column, garbage_frame, negative=True)
+        if obstacle.uid in obstacles_in_last_collisions.keys():
+            obstacles.pop(obstacle.uid)
+            obstacles_in_last_collisions.pop(obstacle.uid)
+            return
         row += speed
 
     obstacles.pop(obstacle.uid)

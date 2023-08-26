@@ -8,7 +8,8 @@ from itertools import cycle
 from curses_tools import draw_frame, read_controls, get_frame_size
 from obstacles import show_obstacles
 from physics import update_speed
-from space_garbage import fly_garbage, obstacles
+from space_garbage import fly_garbage, obstacles, obstacles_in_last_collisions
+
 
 TIC_TIMEOUT = 0.1
 BORDER_WIDTH = 1
@@ -60,6 +61,7 @@ async def make_fire(canvas, start_row, start_column, rows_speed=-0.3, columns_sp
     while 1 < row < max_row and 1 < column < max_column:
         for obstacle in obstacles.values():
             if obstacle.has_collision(row, column):
+                obstacles_in_last_collisions[obstacle.uid] = obstacle
                 return
         canvas.addstr(round(row), round(column), symbol)
         await asyncio.sleep(0)
