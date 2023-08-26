@@ -1,6 +1,7 @@
 import asyncio
 
 from curses_tools import draw_frame
+from explosion import explode
 from obstacles import Obstacle
 
 
@@ -30,7 +31,14 @@ async def fly_garbage(canvas, column, garbage_frame, frame_row_count, frame_colu
         if obstacle.uid in obstacles_in_last_collisions.keys():
             obstacles.pop(obstacle.uid)
             obstacles_in_last_collisions.pop(obstacle.uid)
+
+            explosion_row_center = row + frame_row_count
+            explosion_column_center = column + frame_column_count / 3
+
+            await explode(canvas, explosion_row_center, explosion_column_center)
+
             return
+
         row += speed
 
     obstacles.pop(obstacle.uid)
