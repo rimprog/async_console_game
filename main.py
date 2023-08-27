@@ -70,7 +70,7 @@ async def make_fire(canvas, start_row, start_column, rows_speed=-0.3, columns_sp
         column += columns_speed
 
 
-async def animate_spaceship(canvas, spaceship_frames, start_row, start_column, canvas_height, canvas_width):
+async def animate_spaceship(canvas, spaceship_frames, start_row, start_column, canvas_height, canvas_width, game_over_frame):
     row, column = start_row, start_column
     row_speed = column_speed = 0
 
@@ -101,6 +101,9 @@ async def animate_spaceship(canvas, spaceship_frames, start_row, start_column, c
         await asyncio.sleep(0)
         draw_frame(canvas, row, column, spaceship_frame, negative=True)
 
+        for obstacle in obstacles.values():
+            if obstacle.has_collision(row, column):
+                await show_game_over(canvas, game_over_frame, start_row, start_column)
 
 async def fill_orbit_with_garbage(canvas, canvas_width, garbage_frames):
     min_column = BORDER_WIDTH
@@ -118,6 +121,16 @@ async def fill_orbit_with_garbage(canvas, canvas_width, garbage_frames):
         garbage_item = fly_garbage(canvas, garbage_item_column, garbage_frame, frame_row_count, frame_column_count, uid)
         coroutines.append(garbage_item)
         await sleep(GARBAGE_RESPAWN_TIME)
+
+
+async def show_game_over(canvas, game_over_frame, start_row, start_column):
+    frame_rows, frame_columns = get_frame_size(game_over_frame)
+    biased_start_row = start_row - frame_rows / 2
+    biased_start_column = start_column - frame_columns / 2
+
+    while True:
+        draw_frame(canvas, biased_start_row, biased_start_column, game_over_frame)
+        await asyncio.sleep(0)
 
 
 async def sleep(tics=1):
@@ -154,6 +167,9 @@ def draw(canvas):
     with open('animation_frames/spaceship_frame_2.txt', 'r') as spaceship_frame_2_file:
         spaceship_frame_2 = spaceship_frame_2_file.read()
 
+    with open('animation_frames/game_over.txt', 'r') as game_over_frame_file:
+        game_over_frame = game_over_frame_file.read()
+
     spaceship_frames = (spaceship_frame_1, spaceship_frame_1, spaceship_frame_2, spaceship_frame_2)
     spaceship = animate_spaceship(
         canvas,
@@ -162,6 +178,7 @@ def draw(canvas):
         canvas_center_column_coordinate,
         canvas_height,
         canvas_width,
+        game_over_frame
     )
 
     garbage_file_names = os.listdir('animation_frames/garbage')
