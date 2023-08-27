@@ -6,12 +6,16 @@ import time
 from itertools import cycle
 
 from curses_tools import draw_frame, read_controls, get_frame_size
+from game_scenario import PHRASES, max_phrase_length
 from physics import update_speed
 from space_garbage import fly_garbage, obstacles, obstacles_in_last_collisions
 
 TIC_TIMEOUT = 0.1
+TICS_IN_ONE_GAME_YEAR = 15
 BORDER_WIDTH = 1
 GARBAGE_RESPAWN_TIME = 20
+
+year = 1957
 
 coroutines = []
 
@@ -122,6 +126,29 @@ async def fill_orbit_with_garbage(canvas, canvas_width, garbage_frames):
         await sleep(GARBAGE_RESPAWN_TIME)
 
 
+async def count_years(canvas):
+    global year
+    phrase = PHRASES.get(year)
+    year_row_position = 1
+    phrase_row_position = 2
+
+    while True:
+        for tics in range(TICS_IN_ONE_GAME_YEAR):
+            canvas.addstr(year_row_position, BORDER_WIDTH, str(year))
+
+            new_phrase = PHRASES[year] if PHRASES.get(year) else phrase
+            phrase = new_phrase
+            canvas.addstr(phrase_row_position, BORDER_WIDTH, phrase)
+
+            canvas.refresh()
+            await asyncio.sleep(0)
+
+            phrase_cleaner_template = ' ' * len(phrase)
+            canvas.addstr(phrase_row_position, BORDER_WIDTH, phrase_cleaner_template)
+
+        year += 1
+
+
 async def show_game_over(canvas, game_over_frame, start_row, start_column):
     frame_rows, frame_columns = get_frame_size(game_over_frame)
     biased_start_row = start_row - frame_rows / 2
@@ -143,8 +170,12 @@ def draw(canvas):
     canvas_height, canvas_width = curses.window.getmaxyx(canvas)
     canvas_center_row_coordinate, canvas_center_column_coordinate = int(canvas_height / 2), int(canvas_width / 2)
 
-    stars_count = 1000
+    info_elements = 2
+    info_window_start_row = canvas_height - info_elements - BORDER_WIDTH * 2
+    info_window_start_column = canvas_width - max_phrase_length - BORDER_WIDTH * 2
+    info_window = canvas.derwin(info_window_start_row, info_window_start_column)
 
+    stars_count = 1000
     stars = []
     for _ in range(stars_count):
         symbol = random.choice('+*.:')
@@ -190,7 +221,9 @@ def draw(canvas):
 
     garbage = fill_orbit_with_garbage(canvas, canvas_width, garbage_frames)
 
-    coroutines.extend([*stars, spaceship, garbage])
+    years = count_years(info_window)
+
+    coroutines.extend([*stars, spaceship, garbage, years])
 
     while True:
         for coroutine in coroutines.copy():
@@ -198,6 +231,7 @@ def draw(canvas):
                 coroutine.send(None)
             except StopIteration:
                 coroutines.remove(coroutine)
+        info_window.border()
         canvas.border()
         canvas.refresh()
         time.sleep(TIC_TIMEOUT)
