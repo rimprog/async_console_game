@@ -6,15 +6,12 @@ import time
 from itertools import cycle
 
 from curses_tools import draw_frame, read_controls, get_frame_size
-from obstacles import show_obstacles
 from physics import update_speed
 from space_garbage import fly_garbage, obstacles, obstacles_in_last_collisions
-
 
 TIC_TIMEOUT = 0.1
 BORDER_WIDTH = 1
 GARBAGE_RESPAWN_TIME = 20
-
 
 coroutines = []
 
@@ -70,7 +67,8 @@ async def make_fire(canvas, start_row, start_column, rows_speed=-0.3, columns_sp
         column += columns_speed
 
 
-async def animate_spaceship(canvas, spaceship_frames, start_row, start_column, canvas_height, canvas_width, game_over_frame):
+async def animate_spaceship(canvas, spaceship_frames, start_row, start_column, canvas_height, canvas_width,
+                            game_over_frame):
     row, column = start_row, start_column
     row_speed = column_speed = 0
 
@@ -104,6 +102,7 @@ async def animate_spaceship(canvas, spaceship_frames, start_row, start_column, c
         for obstacle in obstacles.values():
             if obstacle.has_collision(row, column):
                 await show_game_over(canvas, game_over_frame, start_row, start_column)
+
 
 async def fill_orbit_with_garbage(canvas, canvas_width, garbage_frames):
     min_column = BORDER_WIDTH
@@ -191,9 +190,7 @@ def draw(canvas):
 
     garbage = fill_orbit_with_garbage(canvas, canvas_width, garbage_frames)
 
-    showed_obstacles = show_obstacles(canvas, obstacles.values())
-
-    coroutines.extend([*stars, spaceship, garbage, showed_obstacles])
+    coroutines.extend([*stars, spaceship, garbage])
 
     while True:
         for coroutine in coroutines.copy():
