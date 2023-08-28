@@ -4,7 +4,6 @@ from curses_tools import draw_frame
 from explosion import explode
 from obstacles import Obstacle
 
-
 obstacles = {}
 obstacles_in_last_collisions = {}
 

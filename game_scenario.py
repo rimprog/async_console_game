@@ -1,7 +1,6 @@
 TRASH_YEAR = 1969
 PLASMA_GUN_YEAR = 2020
 
-
 PHRASES = {
     1957: "First Sputnik",
     1961: "Gagarin flew!",
@@ -12,7 +11,6 @@ PHRASES = {
     2011: 'Messenger launch to Mercury',
     2020: "Take the plasma gun! Shoot the garbage!",
 }
-
 
 max_phrase_length = max([len(phrase) for phrase in PHRASES.values()])
 
