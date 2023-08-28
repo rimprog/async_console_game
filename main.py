@@ -121,10 +121,11 @@ async def fill_orbit_with_garbage(canvas, canvas_width, garbage_frames):
         garbage_item_column = random.randint(min_column, biased_max_column)
 
         garbage_delay_tics = get_garbage_delay_tics(year)
+        garbage_speed = random.uniform(0.1, 3.0)
 
         if garbage_delay_tics:
             garbage_item = fly_garbage(canvas, garbage_item_column, garbage_frame, frame_row_count, frame_column_count,
-                                       uid)
+                                       uid, speed=garbage_speed)
             coroutines.append(garbage_item)
             await sleep(garbage_delay_tics)
         else:
