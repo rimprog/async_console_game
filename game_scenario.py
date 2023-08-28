@@ -1,3 +1,6 @@
+trash_year = 1969
+
+
 PHRASES = {
     1957: "First Sputnik",
     1961: "Gagarin flew!",

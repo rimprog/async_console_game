@@ -6,14 +6,13 @@ import time
 from itertools import cycle
 
 from curses_tools import draw_frame, read_controls, get_frame_size
-from game_scenario import PHRASES, max_phrase_length
+from game_scenario import PHRASES, max_phrase_length, get_garbage_delay_tics, trash_year
 from physics import update_speed
 from space_garbage import fly_garbage, obstacles, obstacles_in_last_collisions
 
 TIC_TIMEOUT = 0.1
 TICS_IN_ONE_GAME_YEAR = 15
 BORDER_WIDTH = 1
-GARBAGE_RESPAWN_TIME = 20
 
 year = 1957
 
@@ -121,9 +120,16 @@ async def fill_orbit_with_garbage(canvas, canvas_width, garbage_frames):
         biased_max_column = max_column - frame_column_count
         garbage_item_column = random.randint(min_column, biased_max_column)
 
-        garbage_item = fly_garbage(canvas, garbage_item_column, garbage_frame, frame_row_count, frame_column_count, uid)
-        coroutines.append(garbage_item)
-        await sleep(GARBAGE_RESPAWN_TIME)
+        garbage_delay_tics = get_garbage_delay_tics(year)
+
+        if garbage_delay_tics:
+            garbage_item = fly_garbage(canvas, garbage_item_column, garbage_frame, frame_row_count, frame_column_count,
+                                       uid)
+            coroutines.append(garbage_item)
+            await sleep(garbage_delay_tics)
+        else:
+            tics_to_trash_year = (trash_year - year) * TICS_IN_ONE_GAME_YEAR
+            await sleep(tics_to_trash_year)
 
 
 async def count_years(canvas):
