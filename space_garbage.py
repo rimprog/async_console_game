@@ -1,4 +1,5 @@
 import asyncio
+import curses
 
 from curses_tools import draw_frame
 from explosion import explode
@@ -22,7 +23,7 @@ async def fly_garbage(canvas, column, garbage_frame, frame_row_count, frame_colu
 
     while row < rows_number:
         obstacle.row = row
-        draw_frame(canvas, row, column, garbage_frame)
+        draw_frame(canvas, row, column, garbage_frame, curses.color_pair(0))
 
         await asyncio.sleep(0)
 

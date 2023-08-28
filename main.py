@@ -41,10 +41,10 @@ async def make_fire(canvas, start_row, start_column, rows_speed=-0.3, columns_sp
 
     row, column = start_row, start_column
 
-    canvas.addstr(round(row), round(column), '*')
+    canvas.addstr(round(row), round(column), '*', curses.color_pair(2))
     await asyncio.sleep(0)
 
-    canvas.addstr(round(row), round(column), 'O')
+    canvas.addstr(round(row), round(column), 'O', curses.color_pair(2))
     await asyncio.sleep(0)
     canvas.addstr(round(row), round(column), ' ')
 
@@ -63,7 +63,7 @@ async def make_fire(canvas, start_row, start_column, rows_speed=-0.3, columns_sp
             if obstacle.has_collision(row, column):
                 obstacles_in_last_collisions[obstacle.uid] = obstacle
                 return
-        canvas.addstr(round(row), round(column), symbol)
+        canvas.addstr(round(row), round(column), symbol, curses.color_pair(2))
         await asyncio.sleep(0)
         canvas.addstr(round(row), round(column), ' ')
         row += rows_speed
@@ -98,7 +98,7 @@ async def animate_spaceship(canvas, spaceship_frames, start_row, start_column, c
             shot = make_fire(canvas, biased_shot_row, biased_shot_column)
             coroutines.append(shot)
 
-        draw_frame(canvas, row, column, spaceship_frame)
+        draw_frame(canvas, row, column, spaceship_frame, curses.color_pair(1))
         await asyncio.sleep(0)
         draw_frame(canvas, row, column, spaceship_frame, negative=True)
 
@@ -161,7 +161,7 @@ async def show_game_over(canvas, game_over_frame, start_row, start_column):
     biased_start_column = start_column - frame_columns / 2
 
     while True:
-        draw_frame(canvas, biased_start_row, biased_start_column, game_over_frame)
+        draw_frame(canvas, biased_start_row, biased_start_column, game_over_frame, curses.color_pair(4))
         await asyncio.sleep(0)
 
 
@@ -173,6 +173,14 @@ async def sleep(tics=1):
 def draw(canvas):
     curses.curs_set(False)
     canvas.nodelay(True)
+
+    curses.start_color()
+    curses.use_default_colors()
+    curses.init_pair(1, curses.COLOR_CYAN, -1)
+    curses.init_pair(2, curses.COLOR_YELLOW, -1)
+    curses.init_pair(3, curses.COLOR_MAGENTA, -1)
+    curses.init_pair(4, curses.COLOR_RED, -1)
+
     canvas_height, canvas_width = curses.window.getmaxyx(canvas)
     canvas_center_row_coordinate, canvas_center_column_coordinate = int(canvas_height / 2), int(canvas_width / 2)
 
