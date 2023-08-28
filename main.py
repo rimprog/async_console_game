@@ -6,7 +6,7 @@ import time
 from itertools import cycle
 
 from curses_tools import draw_frame, read_controls, get_frame_size
-from game_scenario import PHRASES, max_phrase_length, get_garbage_delay_tics, trash_year
+from game_scenario import PHRASES, PLASMA_GUN_YEAR, TRASH_YEAR, max_phrase_length, get_garbage_delay_tics
 from physics import update_speed
 from space_garbage import fly_garbage, obstacles, obstacles_in_last_collisions
 
@@ -92,7 +92,7 @@ async def animate_spaceship(canvas, spaceship_frames, start_row, start_column, c
         row = min(max(min_row, row), biased_max_row)
         column = min(max(min_column, column), biased_max_column)
 
-        if space_pressed:
+        if space_pressed and year >= PLASMA_GUN_YEAR:
             biased_shot_row = row - 1
             biased_shot_column = column + 2
             shot = make_fire(canvas, biased_shot_row, biased_shot_column)
@@ -128,7 +128,7 @@ async def fill_orbit_with_garbage(canvas, canvas_width, garbage_frames):
             coroutines.append(garbage_item)
             await sleep(garbage_delay_tics)
         else:
-            tics_to_trash_year = (trash_year - year) * TICS_IN_ONE_GAME_YEAR
+            tics_to_trash_year = (TRASH_YEAR - year) * TICS_IN_ONE_GAME_YEAR
             await sleep(tics_to_trash_year)
 
 
